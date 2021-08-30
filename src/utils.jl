@@ -3,7 +3,7 @@ Convert the scaling factor to anchor points. An anchor point is a pair of sample
 entry specifies a sample position in the input signal and the second entry specifies a sample position in
 the output signal.
 """
-function getanchorpoints(x::AbstractVector{T}, s::Union{ST,AbstractMatrix{Int}}) where {T<:Number,ST<:Real}
+function getanchorpoints(x::AbstractVector{T}, s::Union{Real,AbstractMatrix{Int}}) where {T<:Number}
     if length(s) == 1
         return [1 1; size(x,1) ceil(Int, s * size(x,1))]
     elseif (size(s,2) == 2) && (ndims(s) == 2)
