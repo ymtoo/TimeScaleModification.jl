@@ -1,12 +1,13 @@
 using TimeScaleModification
-using TimeScaleModification: fastconv, getanchorpoints, fixlength, gettolarance 
+using TimeScaleModification: getanchorpoints, fixlength, gettolarance, fastconv, _stft, _istft 
 
 using DSP
 using SignalAnalysis
 using Test
 
 fs = 96000
-x = cw(5000, 0.5, fs) |> real |> collect
+freq = 5000
+x = cw(freq, 0.5, fs) |> real |> collect
 N = length(x)
 
 @testset "utils" begin
@@ -28,6 +29,25 @@ N = length(x)
     b = randn(256)
     @test conv(a, b) ≈ fastconv(a, b) atol=1e-9
 
+    spec, f, t = _stft(x, 256, 128; fs=fs)
+    freqindex = argmin(abs.(f .- freq))
+    for xcol ∈ eachcol(spec)
+        if !all(xcol .≈ 0)
+            @test argmax(abs.(xcol)) == freqindex
+        end
+    end
+
+    for isfftshift ∈ [true,false]
+        for zeropad ∈ 0:10
+            spec, f, t = _stft(x, 256, 128; fs=fs, zeropad=zeropad, isfftshift=isfftshift)
+            for numiter ∈ 1:10
+                for isrestore ∈ [true,false]
+                    xt = _istft(spec, 256, 128; zeropad=zeropad, numiter=numiter, origsiglen=length(x), isfftshift=isfftshift, isrestore=isrestore)
+                    @test xt ≈ x atol=1e-9
+                end
+            end
+        end
+    end
 end
 
 @testset "core" begin
