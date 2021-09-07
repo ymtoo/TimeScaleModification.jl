@@ -29,7 +29,9 @@ N = length(x)
     b = randn(256)
     @test conv(a, b) ≈ fastconv(a, b) atol=1e-9
 
-    spec, f, t = _stft(x, 256, 128; fs=fs)
+    n = 256
+    synhopsize = 128
+    spec, f, t = _stft(x, n, synhopsize; fs=fs)
     freqindex = argmin(abs.(f .- freq))
     for xcol ∈ eachcol(spec)
         if !all(xcol .≈ 0)
@@ -39,11 +41,14 @@ N = length(x)
 
     for isfftshift ∈ [true,false]
         for zeropad ∈ 0:10
-            spec, f, t = _stft(x, 256, 128; fs=fs, zeropad=zeropad, isfftshift=isfftshift)
+            spec, f, t = _stft(x, n, synhopsize; fs=fs, zeropad=zeropad, isfftshift=isfftshift)
             for numiter ∈ 1:10
                 for isrestore ∈ [true,false]
-                    xt = _istft(spec, 256, 128; zeropad=zeropad, numiter=numiter, origsiglen=length(x), isfftshift=isfftshift, isrestore=isrestore)
-                    @test xt ≈ x atol=1e-9
+                    xt1 = _istft(spec, n, synhopsize; zeropad=zeropad, numiter=numiter, origsiglen=length(x), isfftshift=isfftshift, isrestore=isrestore)
+                    win = rect(n)
+                    xt2 = _istft(spec, win, synhopsize; zeropad=zeropad, numiter=numiter, origsiglen=length(x), isfftshift=isfftshift, isrestore=isrestore)
+                    @test xt1 == xt2 
+                    @test xt1 ≈ x atol=1e-9
                 end
             end
         end
@@ -73,6 +78,16 @@ end
     @test gettolarance(wsola) == convert(eltype(x), tol)
     for s ∈ [0.5,1.0,1.5]
         y = tsmodify(wsola, x, s)
+        @test length(y) == round(Int, length(x) * s)
+        s == 1.0 && (@test y ≈ x atol=1e-9) 
+    end
+
+    # PhaseVocoder
+    @test PhaseVocoder(n, synhopsize) == PhaseVocoder(n, synhopsize, rect)
+    @test PhaseVocoder(n, synhopsize, hanning) == PhaseVocoder(n, synhopsize, hanning, 0, false, false, false)
+    phasevocoder = PhaseVocoder(n, synhopsize, hanning)
+    for s ∈ [0.5,1.0,1.5]
+        y = tsmodify(phasevocoder, x, s)
         @test length(y) == round(Int, length(x) * s)
         s == 1.0 && (@test y ≈ x atol=1e-9) 
     end

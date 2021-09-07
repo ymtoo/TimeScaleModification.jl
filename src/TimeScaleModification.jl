@@ -5,7 +5,7 @@ using Interpolations
 using Reexport
 
 @reexport using DSP.Windows
-export OLA, WSOLA, tsmodify
+export OLA, WSOLA, PhaseVocoder, tsmodify
 export pitchshift, timestretch
 
 abstract type AbstractTimeScaleModifier end
