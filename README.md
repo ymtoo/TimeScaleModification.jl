@@ -1,18 +1,23 @@
 # TimeScaleModification.jl
-Time-scale modification for Julia
+The package implements time-scale modification algorithms to speed up or slow down an audio signal without alternating its pitch.
 
 ## Installation
+```julia-repl
+julia>]
+pkg> add https://github.com/ymtoo/TimeScaleModification.jl.git
+```
 
 ## Usage
 ```julia
 using Plots
 using SignalAnalysis
 using TimeScaleModification
+
+fs = 96000
+x = cw(5000, 0.5, fs) |> real |> collect
 ```
 ### OLA
 ```julia
-fs = 96000
-x = cw(5000, 0.5, fs) |> real |> collect
 y = tsmodify(OLA(256,128,hanning), x, 1.5)
 
 l = @layout [a b]
@@ -42,6 +47,22 @@ plot!(signal(y[1:960], fs); legend=true, label="time-scale modified")
 ```
 ![](docs/images/swola-cw-time.png)
 
+### Phase Vocoder
+```julia
+y = tsmodify(PhaseVocoder(256,128,hanning,16,false,false,true), x, 1.5)
+
+l = @layout [a b]
+p1 = specgram(signal(x, fs); legend=:none, title="original")
+p2 = specgram(signal(y, fs); ylabel="", legend=:none, title="time-scale modified")
+plot(p1, p2; layout=l)
+```
+![](docs/images/phasevocoder-cw-spec.png)
+```julia
+plot(signal(x[1:960], fs); legend=true, label="original")
+plot!(signal(y[1:960], fs); legend=true, label="time-scale modified")
+```
+![](docs/images/phasevocoder-cw-time.png)
+
 ### Pitch shifting
 ```julia
 xps = pitchshift(WSOLA(256,128,hanning,10), x, 6; fs=fs)
@@ -50,7 +71,16 @@ p1 = specgram(signal(x, fs); legend=:none, title="original")
 p2 = specgram(signal(xps, fs); ylabel="", legend=:none, title="pitch shifted")
 plot(p1, p2; layout=l)
 ```
-![](docs/images/pitchshift-wsola-cw.png)
+![](docs/images/pitchshift-wsola-cw-spec.png)
+
+```julia
+xps = pitchshift(PhaseVocoder(256,128,hanning,16,false,false,true), x, 6; fs=fs)
+l = @layout [a b]
+p1 = specgram(signal(x, fs); legend=:none, title="original")
+p2 = specgram(signal(xps, fs); ylabel="", legend=:none, title="pitch shifted")
+plot(p1, p2; layout=l)
+```
+![](docs/images/pitchshift-phasevocoder-cw-spec.png)
 
 ## Reference
 Driedger J, Müller M., "TSM Toolbox: MATLAB Implementations of Time-Scale Modification Algorithms", In DAFx, pp. 249-256. 2014.
