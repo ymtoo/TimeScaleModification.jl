@@ -1,10 +1,10 @@
 """
 Overlap-Add.
 """
-struct OLA <: AbstractTimeScaleModifier
+struct OLA{W} <: AbstractTimeScaleModifier
     n::Int
     synhopsize::Int
-    winfunc::Function
+    winfunc::W
 end
 OLA(n, synhopsize) = OLA(n, synhopsize, rect)
 
@@ -13,23 +13,23 @@ Waveform Similarity Overlap-Add. `tolerance` is the number of samples the
 window positions in the input signal may be shifted to avoid phase discontinuities
 when overlap-adding them to form the output signal.
 """
-struct WSOLA <: AbstractTimeScaleModifier
+struct WSOLA{W} <: AbstractTimeScaleModifier
     n::Int
     synhopsize::Int
-    winfunc::Function
+    winfunc::W
     tolerance::Int 
 end
 WSOLA(n, synhopsize, winfunc) = WSOLA(n, synhopsize, winfunc, 1)
 WSOLA(n, synhopsize) = WSOLA(n, synhopsize, rect)
 
-gettolarance(::OLA) = 0
+gettolarance(::OLA) = zero(Int)
 gettolarance(f::WSOLA) = f.tolerance
 
 function tsmodify(tsm::Union{OLA,WSOLA}, x::AbstractVector{T}, s::Union{Real,AbstractMatrix{Int}}) where {T<:Number}
     anchorpoints = getanchorpoints(x, s)
     Nout = anchorpoints[end,2]
 
-    win = convert.(T, tsm.winfunc(tsm.n))
+    win = tsm.winfunc(tsm.n)::Vector{T}
     winlen = length(win)
     winlenhalf = winlen ÷ 2
 
@@ -50,7 +50,7 @@ function tsmodify(tsm::Union{OLA,WSOLA}, x::AbstractVector{T}, s::Union{Real,Abs
 
     y = zeros(T, Nout + 2 * winlen)
     ow = zeros(T, Nout + 2 * winlen)
-    del = 0 # shift of the current analysis window position
+    del = zero(Int) # shift of the current analysis window position
     for i = 1:length(anawinpos)-1
         currsynwinran = synwinpos[i]:(synwinpos[i] + winlen - 1)
         curranawinran = (anawinpos[i] + del):(anawinpos[i] + winlen - 1 + del)
@@ -76,10 +76,10 @@ end
 """
 Phase vocoder.
 """
-struct PhaseVocoder <: AbstractTimeScaleModifier
+struct PhaseVocoder{W} <: AbstractTimeScaleModifier
     n::Int
     synhopsize::Int
-    winfunc::Function
+    winfunc::W
     zeropad::Int
     isfftshift::Bool
     isrestore::Bool
@@ -92,7 +92,7 @@ function tsmodify(tsm::PhaseVocoder, x::AbstractVector{T}, s::Real) where {T<:Nu
     anchorpoints = getanchorpoints(x, s)
     Nout = anchorpoints[end,2]
 
-    win = convert.(T, tsm.winfunc(tsm.n))
+    win = tsm.winfunc(tsm.n)::Vector{T} 
     #win = [zeros(T, tsm.zeropad÷2);x;zeros(T, tsm.zeropad÷2)]
     #winlen = length(win)
     #winlenhalf = winlen ÷ 2
@@ -128,8 +128,7 @@ function tsmodify(tsm::PhaseVocoder, x::AbstractVector{T}, s::Real) where {T<:Nu
         ϕsyn = angle.(Y[:,i-1])
 
         if !tsm.isphaselock
-            θ = ϕsyn .+ ipahop .- ϕcurr
-            phasor = exp.(im .* θ)
+            phasor = exp.(im .* (ϕsyn .+ ipahop .- ϕcurr))
         else
             pkindices, irs, ire = findpeaks(abs.(spec[:,i]))
             θ = zero(Y[:,i])

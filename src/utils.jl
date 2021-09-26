@@ -191,7 +191,7 @@ function findpeaks(x::AbstractVector{T}) where {T<:Real}
                         (x[4:end-1] .< x[3:end-2]) .&
                         (x[2:end-3] .< x[3:end-2]) .&
                         (x[1:end-4] .< x[3:end-2]))
-    isempty(pkindices) && (return nothing)
+    isempty(pkindices) && (return Int[], Int[], Int[])
     irs = zeros(Int, length(pkindices))
     ire = zeros(Int, length(pkindices))
     irs[1] = 1
