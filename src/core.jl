@@ -29,7 +29,7 @@ function tsmodify(tsm::Union{OLA,WSOLA}, x::AbstractVector{T}, s::Union{Real,Abs
     anchorpoints = getanchorpoints(x, s)
     Nout = anchorpoints[end,2]
 
-    win = tsm.winfunc(tsm.n)::Vector{T}
+    win = convert.(T, tsm.winfunc(tsm.n))
     winlen = length(win)
     winlenhalf = winlen ÷ 2
 
@@ -92,7 +92,7 @@ function tsmodify(tsm::PhaseVocoder, x::AbstractVector{T}, s::Real) where {T<:Nu
     anchorpoints = getanchorpoints(x, s)
     Nout = anchorpoints[end,2]
 
-    win = tsm.winfunc(tsm.n)::Vector{T} 
+    win = convert.(T, tsm.winfunc(tsm.n)) 
     #win = [zeros(T, tsm.zeropad÷2);x;zeros(T, tsm.zeropad÷2)]
     #winlen = length(win)
     #winlenhalf = winlen ÷ 2

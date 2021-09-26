@@ -59,14 +59,18 @@ end
     
     n = 256
     synhopsize = 128
+    Ts = [Float64, Float32]
     
     # OLA
     @test OLA(n, synhopsize) == OLA(n, synhopsize, rect)
     ola = OLA(n, synhopsize, hanning)
     @test ola.winfunc == hanning
     @test gettolarance(ola) == 0 
-    for s ∈ [0.5,1.0,1.5]
-        @test length(tsmodify(ola, x, s)) == round(Int, length(x) * s)
+    for T ∈ Ts
+        x1 = convert.(T, x)
+        for s ∈ [0.5,1.0,1.5]
+            @test length(tsmodify(ola, x1, s)) == round(Int, length(x1) * s)
+        end
     end
 
     # WSOLA 
@@ -76,22 +80,27 @@ end
     wsola = WSOLA(n, synhopsize, hanning, tol)
     @test wsola.tolerance == tol
     @test gettolarance(wsola) == convert(eltype(x), tol)
-    for s ∈ [0.5,1.0,1.5]
-        y = tsmodify(wsola, x, s)
-        @test length(y) == round(Int, length(x) * s)
-        s == 1.0 && (@test y ≈ x atol=1e-9) 
+    for T ∈ Ts
+        x1 = convert.(T, x)
+        for s ∈ [0.5,1.0,1.5]
+            y = tsmodify(wsola, x1, s)
+            @test length(y) == round(Int, length(x1) * s)
+            s == 1.0 && (@test y ≈ x1 atol=1e-3) 
+        end
     end
 
     # PhaseVocoder
     @test PhaseVocoder(n, synhopsize) == PhaseVocoder(n, synhopsize, rect)
     @test PhaseVocoder(n, synhopsize, hanning) == PhaseVocoder(n, synhopsize, hanning, 0, false, false, false)
     phasevocoder = PhaseVocoder(n, synhopsize, hanning)
-    for s ∈ [0.5,1.0,1.5]
-        y = tsmodify(phasevocoder, x, s)
-        @test length(y) == round(Int, length(x) * s)
-        s == 1.0 && (@test y ≈ x atol=1e-9) 
+    for T ∈ Ts
+        x1 = convert.(T, x)
+        for s ∈ [0.5,1.0,1.5]
+            y = tsmodify(phasevocoder, x1, s)
+            @test length(y) == round(Int, length(x1) * s)
+            s == 1.0 && (@test y ≈ x1 atol=1e-3) 
+        end
     end
-
 end
 
 @testset "tools" begin
