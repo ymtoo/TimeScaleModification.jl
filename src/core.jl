@@ -54,19 +54,19 @@ function tsmodify(tsm::Union{OLA,WSOLA}, x::AbstractVector{T}, s::Union{Real,Abs
     for i = 1:length(anawinpos)-1
         currsynwinran = synwinpos[i]:(synwinpos[i] + winlen - 1)
         curranawinran = (anawinpos[i] + del):(anawinpos[i] + winlen - 1 + del)
-        y[currsynwinran] .+= @view(xpad[curranawinran]) .* win
-        ow[currsynwinran] .+= win
+        @views y[currsynwinran] .+= xpad[curranawinran] .* win
+        @views ow[currsynwinran] .+= win
 
-        natprog = @view(xpad[curranawinran .+ tsm.synhopsize])
+        natprog = xpad[curranawinran .+ tsm.synhopsize]
 
         nextanawinran = (anawinpos[i+1] - tol):(anawinpos[i+1] + winlen - 1 + tol)
-        xnext = @view(xpad[nextanawinran])
+        xnext = xpad[nextanawinran]
         cc = fastconv(reverse(xnext), natprog)[winlen:end-winlen+1] # xcorr(xnext, natprog; padmode=:none)[f.n:end-f.n+1]#
-        maxindex = argmax(cc)
-        del = tol - maxindex + 1
+        #maxindex = argmax(cc)
+        del = tol - argmax(cc) + 1
     end
-    y[synwinpos[end]:synwinpos[end]+winlen-1] .+= xpad[anawinpos[end]+del:anawinpos[end]+tsm.n-1+del] .* win
-    ow[synwinpos[end]:synwinpos[end]+winlen-1] .+= win
+    @views y[synwinpos[end]:synwinpos[end]+winlen-1] .+= xpad[anawinpos[end]+del:anawinpos[end]+tsm.n-1+del] .* win
+    @views ow[synwinpos[end]:synwinpos[end]+winlen-1] .+= win
     ow[ow .< 1e-3] .= one(T)
     y ./= ow
     y = y[winlenhalf+1:end]
