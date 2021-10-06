@@ -133,11 +133,11 @@ function tsmodify(tsm::PhaseVocoder, x::AbstractVector{T}, s::Real) where {T<:Nu
             pkindices, irs, ire = findpeaks(abs.(spec[:,i]))
             θ = zero(Y[:,i])
             for n ∈ 1:length(pkindices)
-                θ[irs[n]:ire[n]] .= ϕsyn[pkindices[n]] .+ ipahop[pkindices[n]] .- ϕcurr[pkindices[n]]
+                @views θ[irs[n]:ire[n]] .= ϕsyn[pkindices[n]] .+ ipahop[pkindices[n]] .- ϕcurr[pkindices[n]]
             end
             phasor = exp.(im .* θ)
         end
-        Y[:,i] = phasor .* spec[:,i]
+        @views Y[:,i] = phasor .* spec[:,i]
     end
     _istft(Y, 
            win, 

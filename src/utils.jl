@@ -65,7 +65,7 @@ function _stft(x::AbstractVector{T},
         xi = xpad[winpos[i]:winpos[i] + winlen - 1] .* win
         isfftshift && (xi = DSP.fftshift(xi))
         Xi = DSP.fft(xi)
-        spec[:,i] = Xi[1:winlenhalf+1]
+        @views spec[:,i] = Xi[1:winlenhalf+1]
     end
     t = (winpos .- 1) ./ fs
     f = (0:winlenhalf) .* fs ./ winlen
@@ -163,8 +163,8 @@ function lsee_mstft(spec::AbstractMatrix{Complex{T}},
             xiw .*= xienergy ./ (xiwenergy .+ eps(T))
         end
 
-        x[winpos[i]:winpos[i]+winlen-1] .+= xiw
-        ow[winpos[i]:winpos[i]+winlen-1] .+= win.^2  
+        @views x[winpos[i]:winpos[i]+winlen-1] .+= xiw
+        @views ow[winpos[i]:winpos[i]+winlen-1] .+= win.^2  
     end
     ow[ow .< 1e-3] .= one(T)
     x ./= ow
