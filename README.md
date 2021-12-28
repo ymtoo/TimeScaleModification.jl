@@ -121,22 +121,23 @@ plot!(signal(yburst, fs); legend=true, label="time-scale modified")
 
 ### Pitch shifting
 ```julia
-xps = pitchshift(WSOLA(256,128,hanning,10), x, 6; fs=fs)
+xps = pitchshift(WSOLA(256,128,hanning,10), x, 6)
 l = @layout [a b]
 p1 = specgram(signal(x, fs); legend=:none, title="original")
-p2 = specgram(signal(xps, fs); ylabel="", legend=:none, title="pitch shifted")
+p2 = specgram(signal(xps, fs); ylabel="", legend=:none, title="pitch-shifted")
 plot(p1, p2; layout=l)
 ```
 ![](docs/images/pitchshift-wsola-cw-spec.png)
 
+### Time stretching
 ```julia
-xps = pitchshift(PhaseVocoder(256,128,hanning,16,false,false,true), x, 6; fs=fs)
+xburstts = timestretch(PhaseVocoder(256,128,hanning,16,false,false,true), xburst, 3; fixlen=false)
 l = @layout [a b]
-p1 = specgram(signal(x, fs); legend=:none, title="original")
-p2 = specgram(signal(xps, fs); ylabel="", legend=:none, title="pitch shifted")
+p1 = specgram(signal(xburst, fs); legend=:none, title="original")
+p2 = specgram(signal(xburstts, fs); ylabel="", legend=:none, title="time-scaled")
 plot(p1, p2; layout=l)
 ```
-![](docs/images/pitchshift-phasevocoder-cw-spec.png)
+![](docs/images/timestretch-phasevocoder-burst-spec.png)
 
 ## Reference
 Driedger J, Müller M., "TSM Toolbox: MATLAB Implementations of Time-Scale Modification Algorithms", In DAFx, pp. 249-256. 2014.
