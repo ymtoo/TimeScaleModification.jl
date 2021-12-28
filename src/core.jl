@@ -1,5 +1,6 @@
 """
-Overlap-Add.
+Overlap-Add. `n` is window size, `synhopsize` is the hop size of the synthesis window and \
+`winfunc` is the analysis and synthesis window for STFT.
 """
 struct OLA{W} <: AbstractTimeScaleModifier
     n::Int
@@ -9,9 +10,11 @@ end
 OLA(n, synhopsize) = OLA(n, synhopsize, rect)
 
 """
-Waveform Similarity Overlap-Add. `tolerance` is the number of samples the 
-window positions in the input signal may be shifted to avoid phase discontinuities
-when overlap-adding them to form the output signal.
+Waveform Similarity Overlap-Add. `n` is window size, `synhopsize` is the hop size of the synthesis window and \
+`winfunc` is the analysis and synthesis window for STFT.
+
+`tolerance` is the number of samples the window positions in the input signal may be shifted \
+to avoid phase discontinuities when overlap-adding them to form the output signal.
 """
 struct WSOLA{W} <: AbstractTimeScaleModifier
     n::Int
@@ -25,6 +28,37 @@ WSOLA(n, synhopsize) = WSOLA(n, synhopsize, rect)
 gettolarance(::OLA) = zero(Int)
 gettolarance(f::WSOLA) = f.tolerance
 
+"""
+Modify time scale of `x` using either `OLA` or `WSOLA`.
+
+# Arguments
+- tsm: OLA or WSOLA instance
+- x: 1-D signal
+- s: a constant scaling factor or a n x 2 matrix representing a set of n anchorpoints 
+relating sample positions in the input signal with sample positions in the output signal.
+
+# Returns
+Time scale modifed signal
+
+# Examples
+```julia-repl
+julia> tsmodify(OLA(256,128,hanning), randn(1000), 1.5)
+1500-element Vector{Float64}:
+ -0.5010944306688007
+  2.0751141429688493
+  ⋮
+  0.8717305567708631
+ -0.9940213359357077
+
+julia> tsmodify(WSOLA(256,128,hanning,10), randn(1000), [1 1; 10 10])
+10-element Vector{Float64}:
+  0.07891842073223751
+ -0.11009242947582566
+  ⋮
+ -2.342067676109941
+  0.2866198482301998
+```
+"""
 function tsmodify(tsm::Union{OLA,WSOLA}, x::AbstractVector{T}, s::Union{Real,AbstractMatrix{Int}}) where {T<:Number}
     anchorpoints = getanchorpoints(x, s)
     Nout = anchorpoints[end,2]
@@ -74,7 +108,14 @@ function tsmodify(tsm::Union{OLA,WSOLA}, x::AbstractVector{T}, s::Union{Real,Abs
 end
 
 """
-Phase vocoder.
+Phase vocoder. `n` is window size, `synhopsize` is the hop size of the synthesis window and \
+`winfunc` is the analysis and synthesis window for STFT.
+
+`zeropad` is the number of zeros to be padded to the window. If `isfftshift` is `true`, the \
+zero-frequency component is shifted to the center. If `isrestore` is `true`, every windowed \
+synthesis frame is rescaled to compensate for energy leakage. If `isphaselock` is `true`, \
+phase locking is applied. Details can be found at \
+https://www.audiolabs-erlangen.de/content/resources/MIR/TSMtoolbox/pvTSM.m
 """
 struct PhaseVocoder{W} <: AbstractTimeScaleModifier
     n::Int
@@ -88,7 +129,40 @@ end
 PhaseVocoder(n, synhopsize, winfunc) = PhaseVocoder(n, synhopsize, winfunc, 0, false, false, false)
 PhaseVocoder(n, synhopsize) = PhaseVocoder(n, synhopsize, rect)
 
-function tsmodify(tsm::PhaseVocoder, x::AbstractVector{T}, s::Real) where {T<:Number}
+"""
+Modify time scale of `x` using `PhaseVocoder`.
+
+# Arguments
+- tsm: PhaseVocoder instance
+- x: 1-D signal
+- s: a constant scaling factor or a n x 2 matrix representing a set of n anchorpoints 
+relating sample positions in the input signal with sample positions in the output signal.
+
+# Returns
+Time scale modifed signal
+
+# Examples:
+```julia-repl
+julia> tsmodify(PhaseVocoder(256,128,hanning,16,false,false,true), randn(1000), 1.5)
+1500-element Vector{Float64}:
+  0.6042886457594456
+ -0.4197586697067266
+  ⋮
+  0.15547596878459596
+ -0.39570063285685614
+
+julia> tsmodify(PhaseVocoder(256,128,hanning,16,false,false,true), randn(1000), [1 1; 10 10])
+10-element Vector{Float64}:
+  0.9705544964709033
+ -0.42565730762449744
+  ⋮
+  0.7656078049589671
+ -0.354979106782902
+```
+"""
+function tsmodify(tsm::PhaseVocoder, 
+                  x::AbstractVector{T}, 
+                  s::Union{Real,AbstractMatrix{Int}}) where {T<:Number}
     anchorpoints = getanchorpoints(x, s)
     Nout = anchorpoints[end,2]
 
