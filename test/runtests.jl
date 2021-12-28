@@ -105,6 +105,13 @@ end
 
 @testset "tools" begin
     
-
-
+    tsms = [OLA(256, 128, hanning),
+           WSOLA(256, 128, hanning, 10), 
+           PhaseVocoder(256, 128, hanning, 16, false, false, true)]
+    for tsm ∈ tsms
+        xps1 = pitchshift(tsm, x, 0)
+        xts1 = timestretch(tsm, x, 1)
+        @test xps1 ≈ x atol=1e-2
+        @test xts1 ≈ x atol=1e-2
+    end
 end
