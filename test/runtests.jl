@@ -16,6 +16,8 @@ N = length(x)
     @test getanchorpoints(x, s1) == [1 1; N ceil(Int, s1 * N)]
     s2 = [1 1; N N÷2]
     @test getanchorpoints(x, s2) == s2
+    s3 = [1 1 1; 1 1 1]
+    @test_throws ArgumentError getanchorpoints(x, s3)
 
     y1 = fixlength(x, N÷2)
     @test length(y1) == N÷2
