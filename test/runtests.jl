@@ -44,11 +44,15 @@ N = length(x)
             spec, f, t = _stft(x, n, synhopsize; fs=fs, zeropad=zeropad, isfftshift=isfftshift)
             for numiter ∈ 1:10
                 for isrestore ∈ [true,false]
-                    xt1 = _istft(spec, n, synhopsize; zeropad=zeropad, numiter=numiter, origsiglen=length(x), isfftshift=isfftshift, isrestore=isrestore)
+                    xt11 = _istft(spec, n, synhopsize; zeropad=zeropad, numiter=numiter, origsiglen=length(x), isfftshift=isfftshift, isrestore=isrestore)
+                    xt12 = _istft(spec, n, synhopsize; zeropad=zeropad, numiter=numiter, origsiglen=nothing, isfftshift=isfftshift, isrestore=isrestore)
                     win = rect(n)
-                    xt2 = _istft(spec, win, synhopsize; zeropad=zeropad, numiter=numiter, origsiglen=length(x), isfftshift=isfftshift, isrestore=isrestore)
-                    @test xt1 == xt2 
-                    @test xt1 ≈ x atol=1e-9
+                    xt21 = _istft(spec, win, synhopsize; zeropad=zeropad, numiter=numiter, origsiglen=length(x), isfftshift=isfftshift, isrestore=isrestore)
+                    xt22 = _istft(spec, win, synhopsize; zeropad=zeropad, numiter=numiter, origsiglen=nothing, isfftshift=isfftshift, isrestore=isrestore)
+                    @test xt11 == xt21
+                    @test xt11 ≈ xt12[1:length(x)]
+                    @test xt21 ≈ xt22[1:length(x)] 
+                    @test xt11 ≈ x atol=1e-9
                 end
             end
         end
