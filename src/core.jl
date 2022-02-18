@@ -94,9 +94,8 @@ function tsmodify(tsm::Union{OLA,WSOLA}, x::AbstractVector{T}, s::Union{Real,Abs
         natprog = xpad[curranawinran .+ tsm.synhopsize]
 
         nextanawinran = (anawinpos[i+1] - tol):(anawinpos[i+1] + winlen - 1 + tol)
-        xnext = xpad[nextanawinran]
-        cc = fastconv(reverse(xnext), natprog)[winlen:end-winlen+1] # xcorr(xnext, natprog; padmode=:none)[f.n:end-f.n+1]#
-        #maxindex = argmax(cc)
+        @views xnext = xpad[nextanawinran]
+        @views cc = fastconv(reverse(xnext), natprog)[winlen:end-winlen+1] # xcorr(xnext, natprog; padmode=:none)[f.n:end-f.n+1]#
         del = tol - argmax(cc) + 1
     end
     @views y[synwinpos[end]:synwinpos[end]+winlen-1] .+= xpad[anawinpos[end]+del:anawinpos[end]+tsm.n-1+del] .* win
