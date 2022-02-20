@@ -5,8 +5,7 @@ Modify pitch using time-scale modifier `tsm`.
 - tsm: time-scale modifier 
 - x: 1-D signal
 - semitones: how many semitones to shift
-- fixlen: if `true`, right padding the output with zeros such that the lengths of the output and \
-          `x` are the same. 
+- fixlen: if `true`, right padding the output with zeros such that the lengths of the output and `x` are the same. 
 
 # Returns
 Pitch-shifted signal
@@ -47,8 +46,7 @@ Change speed of `x` without affecting its pitch using time-scale modifier `tsm`.
 - tsm: time-scale modifier 
 - x: 1-D signal
 - speed: if greater than 1, the signal is sped up and if less than 1, the signal is slowed down
-- fixlen: if `true`, right padding the output with zeros such that the lengths of the output and \
-          `x` are the same. 
+- fixlen: if `true`, right padding the output with zeros such that the lengths of the output and `x` are the same. 
 
 # Returns
 Time-stretched signal

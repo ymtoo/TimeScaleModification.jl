@@ -1,5 +1,5 @@
 """
-Overlap-Add. `n` is window size, `synhopsize` is the hop size of the synthesis window and \
+Overlap-Add. `n` is window size, `synhopsize` is the hop size of the synthesis window and 
 `winfunc` is the analysis and synthesis window for STFT.
 """
 struct OLA{W} <: AbstractTimeScaleModifier
@@ -10,10 +10,10 @@ end
 OLA(n, synhopsize) = OLA(n, synhopsize, rect)
 
 """
-Waveform Similarity Overlap-Add. `n` is window size, `synhopsize` is the hop size of the synthesis window and \
+Waveform Similarity Overlap-Add. `n` is window size, `synhopsize` is the hop size of the synthesis window and 
 `winfunc` is the analysis and synthesis window for STFT.
 
-`tolerance` is the number of samples the window positions in the input signal may be shifted \
+`tolerance` is the number of samples the window positions in the input signal may be shifted 
 to avoid phase discontinuities when overlap-adding them to form the output signal.
 """
 struct WSOLA{W} <: AbstractTimeScaleModifier
@@ -107,13 +107,13 @@ function tsmodify(tsm::Union{OLA,WSOLA}, x::AbstractVector{T}, s::Union{Real,Abs
 end
 
 """
-Phase vocoder. `n` is window size, `synhopsize` is the hop size of the synthesis window and \
+Phase vocoder. `n` is window size, `synhopsize` is the hop size of the synthesis window and 
 `winfunc` is the analysis and synthesis window for STFT.
 
-`zeropad` is the number of zeros to be padded to the window. If `isfftshift` is `true`, the \
-zero-frequency component is shifted to the center. If `isrestore` is `true`, every windowed \
-synthesis frame is rescaled to compensate for energy leakage. If `isphaselock` is `true`, \
-phase locking is applied. Details can be found at \
+`zeropad` is the number of zeros to be padded to the window. If `isfftshift` is `true`, the 
+zero-frequency component is shifted to the center. If `isrestore` is `true`, every windowed 
+synthesis frame is rescaled to compensate for energy leakage. If `isphaselock` is `true`, 
+phase locking is applied. Details can be found at 
 https://www.audiolabs-erlangen.de/content/resources/MIR/TSMtoolbox/pvTSM.m
 """
 struct PhaseVocoder{W} <: AbstractTimeScaleModifier

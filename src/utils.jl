@@ -9,8 +9,8 @@ function getanchorpoints(x::AbstractVector{T}, s::Union{Real,AbstractMatrix{Int}
     elseif (size(s,2) == 2) && (ndims(s) == 2)
         return s
     else
-        throw(ArgumentError("Invalid time stretching factor, \
-                             use scalar or `n` pairs of input output sample points with dimensions of (n, 2)."))
+        throw(ArgumentError("Invalid time stretching factor, " *
+                            "use scalar or `n` pairs of input output sample points with dimensions of (n, 2)."))
     end
 end
 
