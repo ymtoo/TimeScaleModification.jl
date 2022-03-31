@@ -27,8 +27,9 @@ function fastconv(x::AbstractVector{T}, y::AbstractVector{T}) where {T<:Number}
     n = length(y)
     xc = zeros(T, m+n-1)
     @inbounds for j ∈ 1:m
+        @views xj = x[j]
         for k ∈ 1:n
-            @views xc[j+k-1] += x[j] * y[k]
+            @views xc[j+k-1] += xj * y[k]
         end
     end
     xc
