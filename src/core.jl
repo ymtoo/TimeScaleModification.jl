@@ -69,9 +69,9 @@ function tsmodify(tsm::Union{OLA,WSOLA}, x::AbstractVector{T}, s::Union{Real,Abs
 
     synwinpos = 1:tsm.synhopsize:(Nout + winlenhalf)
     # convert to Float64 due to the overflow of integers for the output ratio 
-    anawinpos = LinearInterpolation(Float64.(anchorpoints[:,2]), 
-                                    Float64.(anchorpoints[:,1]);
-                                    extrapolation_bc=Line())(synwinpos) |>
+    anawinpos = linear_interpolation(Float64.(anchorpoints[:,2]), 
+                                     Float64.(anchorpoints[:,1]);
+                                     extrapolation_bc=Line())(synwinpos) |>
                 x -> round.(Int, convert.(Float64, x)) 
     anahopsize = [0;anawinpos[2:end]-anawinpos[1:end-1]]
 
@@ -174,9 +174,9 @@ function tsmodify(tsm::PhaseVocoder,
 
     synwinpos = 1:tsm.synhopsize:(Nout + winlenhalf)
     # convert to Float64 due to the overflow of integers for the output ratio 
-    anawinpos = LinearInterpolation(Float64.(anchorpoints[:,2]), 
-                                    Float64.(anchorpoints[:,1]);
-                                    extrapolation_bc=Line())(synwinpos) |>
+    anawinpos = linear_interpolation(Float64.(anchorpoints[:,2]), 
+                                     Float64.(anchorpoints[:,1]);
+                                     extrapolation_bc=Line())(synwinpos) |>
                 x -> round.(Int, convert.(Float64, x)) 
     anahopsize = [0;anawinpos[2:end]-anawinpos[1:end-1]]
 
@@ -188,7 +188,7 @@ function tsmodify(tsm::PhaseVocoder,
     k = 0:winlenhalf
     ω = 2π .* k ./ winlen
     
-    for i ∈ 2:size(spec,2)
+    for i ∈ axes(spec, 2)[2:end] #2:size(spec,2)
         δϕ = ω * anahopsize[i]
         ϕcurr = angle.(spec[:,i])
         ϕlast = angle.(spec[:,i-1])
@@ -205,7 +205,7 @@ function tsmodify(tsm::PhaseVocoder,
         else
             pkindices, irs, ire = findpeaks(abs.(spec[:,i]))
             θ = zero(Y[:,i])
-            for n ∈ 1:length(pkindices)
+            for n ∈ eachindex(pkindices) #1:length(pkindices)
                 @views θ[irs[n]:ire[n]] .= ϕsyn[pkindices[n]] .+ ipahop[pkindices[n]] .- ϕcurr[pkindices[n]]
             end
             phasor = exp.(im .* θ)
