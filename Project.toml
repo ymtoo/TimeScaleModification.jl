@@ -1,7 +1,7 @@
 name = "TimeScaleModification"
 uuid = "2f3456fb-d83c-4ae1-8472-bfa18b739a06"
 authors = ["ymtoo <ymtoo86@gmail.com>"]
-version = "0.1.4"
+version = "0.1.5"
 
 [deps]
 DSP = "717857b8-e6f2-59f4-9121-6e50c889abd2"
